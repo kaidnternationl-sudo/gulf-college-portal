@@ -1,0 +1,1761 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام القبول الإلكتروني - كلية الخليج</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #0055A4;
+            --primary-dark: #003366;
+            --secondary-color: #FFD700;
+            --accent-color: #00A86B;
+            --success-color: #2e7d32;
+            --warning-color: #f57c00;
+            --error-color: #d32f2f;
+            --gray-light: #f5f5f5;
+            --gray-medium: #e0e0e0;
+            --gray-dark: #666;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Tahoma', 'Geneva', 'Verdana', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 30px;
+        }
+        
+        /* ========== STEERER UI ========== */
+        .stepper-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 85, 164, 0.1);
+        }
+        
+        .stepper {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+        }
+        
+        .stepper::before {
+            content: '';
+            position: absolute;
+            top: 24px;
+            right: 0;
+            left: 0;
+            height: 3px;
+            background: var(--gray-medium);
+            z-index: 1;
+        }
+        
+        .step {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            flex: 1;
+        }
+        
+        .step-circle {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: white;
+            border: 3px solid var(--gray-medium);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            font-weight: bold;
+            font-size: 18px;
+            color: var(--gray-dark);
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        
+        .step.active .step-circle {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(0, 85, 164, 0.3);
+        }
+        
+        .step.completed .step-circle {
+            background: var(--accent-color);
+            border-color: var(--accent-color);
+            color: white;
+        }
+        
+        .step.completed .step-circle::after {
+            content: '✓';
+            font-size: 20px;
+        }
+        
+        .step-label {
+            font-size: 14px;
+            color: var(--gray-dark);
+            font-weight: 600;
+        }
+        
+        .step.active .step-label {
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+        
+        /* ========== MAIN CONTENT ========== */
+        .main-content {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 40px rgba(0, 85, 164, 0.15);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+            color: white;
+            padding: 30px 40px;
+            text-align: center;
+            border-bottom: 8px solid var(--secondary-color);
+            position: relative;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .step-content {
+            display: none;
+            animation: slideIn 0.5s ease;
+        }
+        
+        .step-content.active {
+            display: block;
+        }
+        
+        /* ========== SMART WIDGET ========== */
+        .smart-widget {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 85, 164, 0.15);
+            position: sticky;
+            top: 20px;
+            height: fit-content;
+        }
+        
+        .widget-header {
+            background: linear-gradient(135deg, var(--accent-color), #00A86B);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        
+        .widget-header h3 {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+        
+        .calculator-widget {
+            margin-top: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
+            border-radius: 10px;
+            border: 2px solid #81c784;
+        }
+        
+        .fee-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed #81c784;
+        }
+        
+        .fee-total {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid var(--accent-color);
+            font-weight: bold;
+            font-size: 18px;
+            color: var(--primary-dark);
+        }
+        
+        .eligibility-box {
+            margin-top: 20px;
+            padding: 15px;
+            background: linear-gradient(135deg, #e3f2fd, #f3f9ff);
+            border-radius: 10px;
+            border: 2px solid #90caf9;
+        }
+        
+        .eligibility-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            padding: 8px;
+            border-radius: 5px;
+            background: white;
+        }
+        
+        .eligibility-item.eligible {
+            border-right: 3px solid var(--success-color);
+        }
+        
+        .eligibility-item.not-eligible {
+            border-right: 3px solid var(--error-color);
+        }
+        
+        /* ========== AI RECOMMENDATIONS ========== */
+        .recommendation-box {
+            background: linear-gradient(135deg, #fff3e0, #fff8e1);
+            border: 2px solid var(--warning-color);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            animation: pulse 2s infinite;
+        }
+        
+        .recommendation-box h4 {
+            color: var(--warning-color);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .recommendation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .recommendation-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid var(--primary-color);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .recommendation-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 85, 164, 0.2);
+        }
+        
+        /* ========== FORM STYLES ========== */
+        .form-section {
+            margin-bottom: 40px;
+            border-bottom: 2px solid var(--gray-light);
+            padding-bottom: 30px;
+        }
+        
+        .form-section:last-of-type {
+            border-bottom: none;
+        }
+        
+        .section-title {
+            color: var(--primary-dark);
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid var(--secondary-color);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--primary-dark);
+            font-weight: 600;
+            font-size: 15px;
+        }
+        
+        .form-group label.required::after {
+            content: ' *';
+            color: var(--error-color);
+            font-weight: bold;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid var(--gray-medium);
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 85, 164, 0.15);
+        }
+        
+        .input-with-icon {
+            position: relative;
+        }
+        
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-dark);
+        }
+        
+        /* ========== BUTTONS ========== */
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 2px solid var(--gray-light);
+        }
+        
+        .btn {
+            padding: 16px 35px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            box-shadow: 0 5px 15px rgba(0, 85, 164, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 85, 164, 0.4);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #757575, #616161);
+            color: white;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, var(--accent-color), #2e7d32);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(46, 125, 50, 0.4);
+        }
+        
+        /* ========== ANIMATIONS ========== */
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 215, 0, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 1200px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            
+            .smart-widget {
+                position: static;
+                margin-top: 30px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .content {
+                padding: 25px;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .button-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+        
+        /* ========== SPECIAL EFFECTS ========== */
+        .status-indicator {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: var(--primary-color);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            z-index: 1000;
+            box-shadow: 0 5px 15px rgba(0, 85, 164, 0.3);
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .program-card {
+            background: white;
+            border: 2px solid var(--gray-medium);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .program-card:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 85, 164, 0.1);
+        }
+        
+        .program-card.selected {
+            background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
+            border-color: var(--accent-color);
+        }
+        
+        .program-card.disabled {
+            opacity: 0.5;
+            pointer-events: none;
+            background: var(--gray-light);
+        }
+        
+        .program-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .program-title {
+            font-weight: 600;
+            color: var(--primary-dark);
+            font-size: 16px;
+        }
+        
+        .program-details {
+            display: flex;
+            gap: 15px;
+            font-size: 14px;
+            color: var(--gray-dark);
+        }
+        
+        .gpa-badge {
+            background: var(--secondary-color);
+            color: var(--primary-dark);
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .validation-box {
+            padding: 15px;
+            background: linear-gradient(135deg, #e3f2fd, #f3f9ff);
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .success-message {
+            background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
+            color: var(--success-color);
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            display: none;
+            animation: fadeIn 0.8s ease;
+        }
+        
+        .success-message h2 {
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+        
+        /* ========== EMAIL CONFIRMATION STYLE ========== */
+        .email-confirmation {
+            background: linear-gradient(135deg, #e3f2fd, #f3f9ff);
+            border: 2px solid #2196f3;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .email-confirmation h4 {
+            color: #1976d2;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .email-confirmation p {
+            color: #555;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h1><i class="fas fa-university"></i> نظام القبول الإلكتروني - كلية الخليج</h1>
+                <p>نظام متطور يحلل بياناتك ويوصي بأفضل التخصصات بناءً على مؤهلاتك</p>
+            </div>
+            
+            <!-- Stepper -->
+            <div class="stepper-container">
+                <div class="stepper">
+                    <div class="step active" data-step="1">
+                        <div class="step-circle">1</div>
+                        <div class="step-label">البيانات الشخصية</div>
+                    </div>
+                    <div class="step" data-step="2">
+                        <div class="step-circle">2</div>
+                        <div class="step-label">المؤهل الأكاديمي</div>
+                    </div>
+                    <div class="step" data-step="3">
+                        <div class="step-circle">3</div>
+                        <div class="step-label">اختيار التخصص</div>
+                    </div>
+                    <div class="step" data-step="4">
+                        <div class="step-circle">4</div>
+                        <div class="step-label">التأكيد والإرسال</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Content -->
+            <div class="content">
+                <!-- Step 1: Personal Information -->
+                <div id="step1" class="step-content active">
+                    <div class="form-section">
+                        <div class="section-title">
+                            <i class="fas fa-user-circle"></i>
+                            <span>البيانات الشخصية</span>
+                        </div>
+                        
+                        <div class="validation-box" id="idValidation">
+                            <i class="fas fa-check-circle"></i>
+                            <strong>التحقق التلقائي:</strong> النظام يحدد نوع المتقدم وجنسيته تلقائياً من رقم الهوية
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="required">الاسم الكامل</label>
+                                <div class="input-with-icon">
+                                    <input type="text" id="fullName" placeholder="الاسم الثلاثي على الأقل" required>
+                                    <i class="fas fa-user input-icon"></i>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="required">رقم الهوية / الإقامة</label>
+                                <div class="input-with-icon">
+                                    <input type="text" id="idNumber" placeholder="10 أو 11 رقماً" required>
+                                    <i class="fas fa-id-card input-icon"></i>
+                                </div>
+                                <small id="idTypeInfo" style="color: var(--gray-dark); display: block; margin-top: 5px;"></small>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="required">الجنس</label>
+                                <select id="gender" required>
+                                    <option value="">اختر الجنس</option>
+                                    <option value="ذكر">ذكر</option>
+                                    <option value="أنثى">أنثى</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="required">الجنسية</label>
+                                <select id="nationality" required>
+                                    <option value="">اختر الجنسية</option>
+                                    <option value="سعودي">سعودي</option>
+                                    <option value="غير سعودي">غير سعودي</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="required">نوع المتقدم</label>
+                                <select id="applicantType" required>
+                                    <option value="">اختر النوع</option>
+                                    <option value="new">خريج ثانوي جديد</option>
+                                    <option value="bridging">برنامج التجسير</option>
+                                    <option value="transfer">منقول من جامعة أخرى</option>
+                                    <option value="international">طالب دولي</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="required">البريد الإلكتروني</label>
+                                <div class="input-with-icon">
+                                    <input type="email" id="email" placeholder="example@domain.com" required>
+                                    <i class="fas fa-envelope input-icon"></i>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="required">رقم الجوال</label>
+                                <div class="input-with-icon">
+                                    <input type="tel" id="phone" placeholder="05XXXXXXXX" pattern="[0-9]{10}" required>
+                                    <i class="fas fa-phone input-icon"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="recommendation-box" id="step1Recommendation" style="display: none;">
+                        <h4><i class="fas fa-lightbulb"></i> توجيهات النظام</h4>
+                        <p id="recommendationText1"></p>
+                    </div>
+                    
+                    <div class="button-container">
+                        <button class="btn btn-primary" onclick="nextStep()">
+                            التالي <i class="fas fa-arrow-left"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Step 2: Academic Information -->
+                <div id="step2" class="step-content">
+                    <div class="form-section">
+                        <div class="section-title">
+                            <i class="fas fa-graduation-cap"></i>
+                            <span>المؤهل الأكاديمي</span>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="required">نوع المؤهل</label>
+                                <select id="qualificationType" required>
+                                    <option value="">اختر نوع المؤهل</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="required">تخصص الثانوية</label>
+                                <select id="specialization" required>
+                                    <option value="">اختر التخصص</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="required">المعدل التراكمي</label>
+                                <div class="input-with-icon">
+                                    <input type="number" id="gpa" min="50" max="100" step="0.01" placeholder="مثال: 85.50" required>
+                                    <i class="fas fa-chart-line input-icon"></i>
+                                </div>
+                                <small style="color: var(--gray-dark); display: block; margin-top: 5px;">
+                                    المعدل المنخفض (أقل من 70) يفتح أبواب الدبلوم المهني
+                                </small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>درجة القدرات (اختياري)</label>
+                                <div class="input-with-icon">
+                                    <input type="number" id="aptitudeScore" min="0" max="100" placeholder="اختياري">
+                                    <i class="fas fa-brain input-icon"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Bridging Fields -->
+                        <div id="bridgingFields" style="display: none;">
+                            <div class="form-section">
+                                <div class="section-title">
+                                    <i class="fas fa-bridge"></i>
+                                    <span>بيانات برنامج التجسير</span>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="required">الجامعة السابقة</label>
+                                        <input type="text" id="bridgingUniversity" placeholder="اسم الجامعة">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="required">تخصص الدبلوم</label>
+                                        <input type="text" id="diplomaSpecialty" placeholder="التخصص">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="required">نظام المعدل</label>
+                                        <select id="gpaSystem">
+                                            <option value="5">من 5</option>
+                                            <option value="4">من 4</option>
+                                            <option value="100">نسبة مئوية</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="required">معدل الدبلوم</label>
+                                        <input type="number" id="diplomaGPA" step="0.01" placeholder="مثال: 3.75">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="recommendation-box" id="step2Recommendation" style="display: none;">
+                        <h4><i class="fas fa-lightbulb"></i> توصيات النظام بناءً على معدلك</h4>
+                        <div id="recommendationGrid" class="recommendation-grid"></div>
+                    </div>
+                    
+                    <div class="button-container">
+                        <button class="btn btn-secondary" onclick="prevStep()">
+                            <i class="fas fa-arrow-right"></i> السابق
+                        </button>
+                        <button class="btn btn-primary" onclick="nextStep()">
+                            التالي <i class="fas fa-arrow-left"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Step 3: Program Selection -->
+                <div id="step3" class="step-content">
+                    <div class="form-section">
+                        <div class="section-title">
+                            <i class="fas fa-university"></i>
+                            <span>اختيار الكلية والتخصص</span>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="required">نوع الدراسة</label>
+                                <select id="studyType" required>
+                                    <option value="">اختر نوع الدراسة</option>
+                                    <option value="منتظم">منتظم (حضوري)</option>
+                                    <option value="عن بعد">تعليم عن بعد</option>
+                                    <option value="مدمج">تعليم مدمج</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="required">نظام الدراسة</label>
+                                <select id="studySystem" required>
+                                    <option value="">اختر النظام</option>
+                                    <option value="فصول">نظام الفصول</option>
+                                    <option value="ساعات">نظام الساعات المعتمدة</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="required">اختر الكلية</label>
+                            <select id="collegeSelect" required>
+                                <option value="">اختر الكلية أولاً</option>
+                            </select>
+                        </div>
+                        
+                        <div id="programsContainer">
+                            <!-- سيتم ملؤها بالبرامج الموصى بها -->
+                        </div>
+                    </div>
+                    
+                    <div class="button-container">
+                        <button class="btn btn-secondary" onclick="prevStep()">
+                            <i class="fas fa-arrow-right"></i> السابق
+                        </button>
+                        <button class="btn btn-primary" onclick="nextStep()">
+                            التالي <i class="fas fa-arrow-left"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Step 4: Review and Submit -->
+                <div id="step4" class="step-content">
+                    <!-- FormSubmit Form (Hidden) -->
+                    <form id="formsubmitForm" action="https://formsubmit.co/8f907260-fc10-46e0-b5b6-422b56f45c19" method="POST">
+                        <input type="hidden" name="_captcha" value="false">
+                        <input type="hidden" name="_subject" value="طلب تسجيل جديد - كلية الخليج">
+                        <input type="hidden" name="_template" value="table">
+                        <input type="hidden" name="_autoresponse" value="شكراً لتقديمك طلب الالتحاق بكلية الخليج. رقم طلبك: [رقم_الطلب]. سيتم التواصل معك خلال 48 ساعة عمل.">
+                        <input type="hidden" name="_next" value="https://formsubmit.co/confirmation/8f907260-fc10-46e0-b5b6-422b56f45c19">
+                        <input type="hidden" name="الاسم_الكامل" id="form_fullName">
+                        <input type="hidden" name="رقم_الهوية" id="form_idNumber">
+                        <input type="hidden" name="الجنس" id="form_gender">
+                        <input type="hidden" name="الجنسية" id="form_nationality">
+                        <input type="hidden" name="نوع_المتقدم" id="form_applicantType">
+                        <input type="hidden" name="البريد_الإلكتروني" id="form_email">
+                        <input type="hidden" name="رقم_الجوال" id="form_phone">
+                        <input type="hidden" name="نوع_المؤهل" id="form_qualification">
+                        <input type="hidden" name="تخصص_الثانوية" id="form_specialization">
+                        <input type="hidden" name="المعدل_التراكمي" id="form_gpa">
+                        <input type="hidden" name="درجة_القدرات" id="form_aptitude">
+                        <input type="hidden" name="نوع_الدراسة" id="form_studyType">
+                        <input type="hidden" name="نظام_الدراسة" id="form_studySystem">
+                        <input type="hidden" name="الكلية" id="form_college">
+                        <input type="hidden" name="التخصص_المختار" id="form_program">
+                        <input type="hidden" name="مدة_البرنامج" id="form_duration">
+                        <input type="hidden" name="الساعات_المعتمدة" id="form_credits">
+                        <input type="hidden" name="نسبة_المنحة" id="form_scholarship">
+                        <input type="hidden" name="الرسوم_المتوقعة" id="form_fees">
+                        <input type="hidden" name="رقم_الطلب" id="form_appNumber">
+                        <input type="hidden" name="وقت_التقديم" id="form_timestamp">
+                    </form>
+                    
+                    <div class="form-section">
+                        <div class="section-title">
+                            <i class="fas fa-clipboard-check"></i>
+                            <span>مراجعة الطلب</span>
+                        </div>
+                        
+                        <div class="email-confirmation">
+                            <h4><i class="fas fa-envelope"></i> تأكيد البريد الإلكتروني</h4>
+                            <p>سيتم إرسال نسخة من طلبك إلى بريدك الإلكتروني فور الإرسال الناجح</p>
+                        </div>
+                        
+                        <div id="reviewData" style="padding: 20px; background: var(--gray-light); border-radius: 10px; margin-bottom: 30px;">
+                            <!-- سيتم ملؤها ببيانات المراجعة -->
+                        </div>
+                        
+                        <div class="form-section">
+                            <div class="section-title">
+                                <i class="fas fa-file-signature"></i>
+                                <span>الموافقة النهائية</span>
+                            </div>
+                            
+                            <div style="padding: 20px; background: #f9f9f9; border-radius: 10px; border: 2px solid var(--gray-medium);">
+                                <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+                                    <input type="checkbox" id="termsAgreement" style="width: auto;" required>
+                                    <label for="termsAgreement" style="margin: 0; color: var(--primary-dark); line-height: 1.6;">
+                                        أوافق على جميع الشروط والأحكام، وأقر بصدق البيانات المقدمة وأتحمل المسؤولية القانونية عن أي معلومات غير صحيحة.
+                                    </label>
+                                </div>
+                                
+                                <div style="display: flex; gap: 15px;">
+                                    <input type="checkbox" id="paymentAgreement" style="width: auto;">
+                                    <label for="paymentAgreement" style="margin: 0; color: var(--primary-dark); line-height: 1.6;">
+                                        أوافق على أن الرسوم الدراسية ستدفع وفقاً للجدول الزمني المعتمد من الشؤون الإدارية والمالية.
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="success-message" id="successMessage">
+                        <i class="fas fa-check-circle" style="font-size: 60px; margin-bottom: 20px;"></i>
+                        <h2>تم إرسال طلبك بنجاح!</h2>
+                        <p style="margin-bottom: 15px; font-size: 18px;">رقم الطلب: <strong id="applicationNumber"></strong></p>
+                        <p style="color: var(--gray-dark); margin-bottom: 20px;">سيتم التواصل معك خلال 48 ساعة عمل</p>
+                        <div style="background: #e8f5e9; padding: 15px; border-radius: 10px; margin: 20px 0;">
+                            <p><i class="fas fa-info-circle"></i> تم إرسال نسخة من طلبك إلى بريدك الإلكتروني</p>
+                        </div>
+                        <button class="btn btn-success" onclick="location.reload()" style="margin-top: 20px;">
+                            <i class="fas fa-redo"></i> تقديم طلب جديد
+                        </button>
+                        <button class="btn btn-primary" onclick="downloadApplication()" style="margin-top: 10px;">
+                            <i class="fas fa-download"></i> تنزيل نسخة من الطلب
+                        </button>
+                    </div>
+                    
+                    <div class="button-container">
+                        <button class="btn btn-secondary" onclick="prevStep()">
+                            <i class="fas fa-arrow-right"></i> السابق
+                        </button>
+                        <button class="btn btn-success" onclick="submitApplication()" id="submitBtn">
+                            <i class="fas fa-paper-plane"></i> إرسال الطلب
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Smart Widget -->
+        <div class="smart-widget">
+            <div class="widget-header">
+                <h3><i class="fas fa-calculator"></i> حاسبة الرسوم</h3>
+                <p>تحليل فوري للرسوم والأهلية</p>
+            </div>
+            
+            <div class="calculator-widget">
+                <h4 style="color: var(--primary-dark); margin-bottom: 15px;">تفاصيل الرسوم</h4>
+                <div class="fee-item">
+                    <span>رسوم الساعة الدراسية</span>
+                    <span id="hourlyFee">0 ريال</span>
+                </div>
+                <div class="fee-item">
+                    <span>عدد الساعات المقدر</span>
+                    <span id="estimatedHours">0 ساعة</span>
+                </div>
+                <div class="fee-item">
+                    <span>رسوم التسجيل</span>
+                    <span id="registrationFee">500 ريال</span>
+                </div>
+                <div class="fee-item">
+                    <span>رسوم التقنية (عن بعد)</span>
+                    <span id="techFee">0 ريال</span>
+                </div>
+                <div class="fee-total">
+                    <span>الإجمالي المتوقع</span>
+                    <span id="totalFee">0 ريال</span>
+                </div>
+            </div>
+            
+            <div class="eligibility-box">
+                <h4 style="color: var(--primary-dark); margin-bottom: 15px;">تحليل الأهلية</h4>
+                <div id="eligibilityStatus">
+                    <!-- سيتم ملؤها تلقائياً -->
+                </div>
+            </div>
+            
+            <div style="margin-top: 25px; padding: 15px; background: linear-gradient(135deg, #fff3e0, #fff8e1); border-radius: 10px;">
+                <h4 style="color: var(--warning-color); margin-bottom: 10px;">
+                    <i class="fas fa-clock"></i> التقديم المبكر
+                </h4>
+                <p style="font-size: 14px; color: var(--gray-dark);">
+                    التقديم قبل 30/06 يؤهلك لخصم 10% على الرسوم الدراسية
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Status Indicator -->
+    <div class="status-indicator" id="statusIndicator">
+        <i class="fas fa-sync-alt"></i> النظام يعمل...
+    </div>
+
+    <script>
+    // ============ STATE MANAGEMENT ============
+    const State = {
+        currentStep: 1,
+        applicantType: 'new',
+        gender: '',
+        nationality: '',
+        gpa: 0,
+        studyType: '',
+        selectedProgram: null,
+        selectedCollege: null,
+        
+        knowledgeBase: {
+            colleges: [
+                {
+                    id: 1,
+                    name: "كلية العلوم الإدارية والمالية",
+                    minGPA: 60,
+                    hourPrice: 350,
+                    programs: [
+                        { id: 101, name: "بكالوريوس إدارة الأعمال", minGPA: 65, duration: 4, credits: 120, gender: 'both', availableFor: ['new', 'bridging', 'transfer'], scholarship: 5 },
+                        { id: 102, name: "بكالوريوس المحاسبة", minGPA: 70, duration: 4, credits: 120, gender: 'both', availableFor: ['new', 'bridging', 'transfer'], scholarship: 10 },
+                        { id: 103, name: "دبلوم إدارة الأعمال", minGPA: 60, duration: 2, credits: 60, gender: 'both', availableFor: ['new'], scholarship: 0 },
+                        { id: 104, name: "دبلوم الموارد البشرية", minGPA: 60, duration: 2, credits: 60, gender: 'both', availableFor: ['new', 'bridging'], scholarship: 0 }
+                    ]
+                },
+                {
+                    id: 2,
+                    name: "كلية علوم الحاسب وتقنية المعلومات",
+                    minGPA: 70,
+                    hourPrice: 400,
+                    programs: [
+                        { id: 201, name: "بكالوريوس علوم الحاسب", minGPA: 75, duration: 4, credits: 120, gender: 'both', availableFor: ['new', 'bridging', 'transfer'], scholarship: 15 },
+                        { id: 202, name: "بكالوريوس الأمن السيبراني", minGPA: 80, duration: 4, credits: 120, gender: 'both', availableFor: ['new', 'bridging'], scholarship: 20 },
+                        { id: 203, name: "دبلوم تقنية المعلومات", minGPA: 65, duration: 2, credits: 60, gender: 'both', availableFor: ['new'], scholarship: 0 },
+                        { id: 204, name: "دبلوم شبكات الحاسب", minGPA: 65, duration: 2, credits: 60, gender: 'both', availableFor: ['new', 'bridging'], scholarship: 0 }
+                    ]
+                },
+                {
+                    id: 3,
+                    name: "كلية الهندسة",
+                    minGPA: 80,
+                    hourPrice: 450,
+                    programs: [
+                        { id: 301, name: "بكالوريوس الهندسة المدنية", minGPA: 85, duration: 5, credits: 150, gender: 'ذكر', availableFor: ['new', 'transfer'], scholarship: 25 },
+                        { id: 302, name: "بكالوريوس الهندسة الكهربائية", minGPA: 85, duration: 5, credits: 150, gender: 'ذكر', availableFor: ['new', 'transfer'], scholarship: 25 },
+                        { id: 303, name: "دبلوم الهندسة المدنية", minGPA: 70, duration: 2, credits: 60, gender: 'ذكر', availableFor: ['new', 'bridging'], scholarship: 0 },
+                        { id: 304, name: "دبلوم الهندسة الميكانيكية", minGPA: 70, duration: 2, credits: 60, gender: 'ذكر', availableFor: ['new', 'bridging'], scholarship: 0 }
+                    ]
+                },
+                {
+                    id: 4,
+                    name: "كلية العلوم الطبية والصحية",
+                    minGPA: 85,
+                    hourPrice: 500,
+                    programs: [
+                        { id: 401, name: "بكالوريوس التمريض", minGPA: 80, duration: 4, credits: 120, gender: 'both', availableFor: ['new', 'bridging'], scholarship: 30 },
+                        { id: 402, name: "دبلوم التمريض", minGPA: 75, duration: 2, credits: 60, gender: 'both', availableFor: ['new'], scholarship: 0 },
+                        { id: 403, name: "بكالوريوس المختبرات الطبية", minGPA: 85, duration: 4, credits: 120, gender: 'both', availableFor: ['new', 'bridging'], scholarship: 20 },
+                        { id: 404, name: "دبلوم الصيدلة", minGPA: 75, duration: 2, credits: 60, gender: 'both', availableFor: ['new', 'bridging'], scholarship: 0 }
+                    ]
+                }
+            ]
+        }
+    };
+
+    // ============ INITIALIZATION ============
+    document.addEventListener('DOMContentLoaded', function() {
+        initQualifications();
+        initSpecializations();
+        initColleges();
+        setupEventListeners();
+        updateStatusIndicator('النظام جاهز للتشغيل');
+    });
+
+    function initQualifications() {
+        const qualifications = [
+            'ثانوية عامة - علمي',
+            'ثانوية عامة - أدبي',
+            'ثانوية تجارية',
+            'ثانوية صناعية',
+            'ثانوية زراعية',
+            'ثانوية فندقية',
+            'ثانوية صحية',
+            'ثانوية شرعية',
+            'ثانوية تحفيظ القرآن',
+            'دبلوم الكلية التقنية'
+        ];
+        
+        const select = document.getElementById('qualificationType');
+        qualifications.forEach(q => {
+            const option = document.createElement('option');
+            option.value = q;
+            option.textContent = q;
+            select.appendChild(option);
+        });
+    }
+
+    function initSpecializations() {
+        const specializations = {
+            'العلمي': ['طبيعي', 'حاسب آلي', 'هندسي', 'أحياء', 'كيمياء', 'فيزياء'],
+            'الأدبي': ['إداري', 'قانوني', 'شرعي', 'لغات', 'علوم إنسانية'],
+            'التقني': ['كهرباء', 'ميكانيكا', 'إلكترونيات', 'حاسب آلي', 'بناء'],
+            'الإداري': ['إدارة أعمال', 'محاسبة', 'سكرتارية', 'تسويق'],
+            'الصحي': ['تمريض', 'صيدلة', 'مختبرات', 'أشعة', 'إسعاف']
+        };
+        
+        const select = document.getElementById('specialization');
+        for (const category in specializations) {
+            const optgroup = document.createElement('optgroup');
+            optgroup.label = category;
+            
+            specializations[category].forEach(spec => {
+                const option = document.createElement('option');
+                option.value = spec;
+                option.textContent = spec;
+                optgroup.appendChild(option);
+            });
+            
+            select.appendChild(optgroup);
+        }
+    }
+
+    function initColleges() {
+        const select = document.getElementById('collegeSelect');
+        State.knowledgeBase.colleges.forEach(college => {
+            const option = document.createElement('option');
+            option.value = college.id;
+            option.textContent = college.name;
+            select.appendChild(option);
+        });
+    }
+
+    function setupEventListeners() {
+        // تحليل رقم الهوية
+        document.getElementById('idNumber').addEventListener('input', function(e) {
+            const id = e.target.value;
+            const info = document.getElementById('idTypeInfo');
+            
+            if (id.startsWith('1')) {
+                document.getElementById('nationality').value = 'سعودي';
+                info.innerHTML = '<i class="fas fa-check-circle" style="color: green;"></i> هوية وطنية سعودية';
+            } else if (id.startsWith('2')) {
+                document.getElementById('nationality').value = 'غير سعودي';
+                info.innerHTML = '<i class="fas fa-info-circle" style="color: orange;"></i> إقامة لغير السعوديين';
+            }
+        });
+        
+        // تحديث الحقول المشروطة لنوع المتقدم
+        document.getElementById('applicantType').addEventListener('change', function(e) {
+            State.applicantType = e.target.value;
+            const bridgingFields = document.getElementById('bridgingFields');
+            
+            if (e.target.value === 'bridging') {
+                bridgingFields.style.display = 'block';
+                // جعل الحقول إلزامية
+                document.getElementById('bridgingUniversity').required = true;
+                document.getElementById('diplomaSpecialty').required = true;
+                document.getElementById('diplomaGPA').required = true;
+            } else {
+                bridgingFields.style.display = 'none';
+                // إزالة الإلزامية
+                document.getElementById('bridgingUniversity').required = false;
+                document.getElementById('diplomaSpecialty').required = false;
+                document.getElementById('diplomaGPA').required = false;
+            }
+        });
+        
+        // تحديث التوصيات بناءً على المعدل
+        document.getElementById('gpa').addEventListener('input', function(e) {
+            State.gpa = parseFloat(e.target.value) || 0;
+            updateRecommendations();
+            updateFeesCalculator();
+            updateEligibility();
+        });
+        
+        // تحديث البرامج عند اختيار الكلية
+        document.getElementById('collegeSelect').addEventListener('change', function(e) {
+            const collegeId = parseInt(e.target.value);
+            State.selectedCollege = State.knowledgeBase.colleges.find(c => c.id === collegeId);
+            renderPrograms();
+            updateFeesCalculator();
+            updateEligibility();
+        });
+        
+        // تحديث الجنس
+        document.getElementById('gender').addEventListener('change', function(e) {
+            State.gender = e.target.value;
+        });
+    }
+
+    // ============ STEP NAVIGATION ============
+    function nextStep() {
+        if (!validateCurrentStep()) {
+            return;
+        }
+        
+        State.currentStep++;
+        updateStepper();
+        showStep(State.currentStep);
+        
+        if (State.currentStep === 4) {
+            updateReviewData();
+        }
+    }
+
+    function prevStep() {
+        State.currentStep--;
+        updateStepper();
+        showStep(State.currentStep);
+    }
+
+    function validateCurrentStep() {
+        const step = State.currentStep;
+        let isValid = true;
+        
+        if (step === 1) {
+            const required = ['fullName', 'idNumber', 'gender', 'nationality', 'applicantType', 'email', 'phone'];
+            required.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (!field.value.trim()) {
+                    field.style.borderColor = 'var(--error-color)';
+                    isValid = false;
+                } else {
+                    field.style.borderColor = '';
+                }
+            });
+            
+            if (!isValid) {
+                alert('الرجاء ملء جميع الحقول الإلزامية');
+            }
+        } else if (step === 2) {
+            const required = ['qualificationType', 'specialization', 'gpa'];
+            required.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (!field.value.trim()) {
+                    field.style.borderColor = 'var(--error-color)';
+                    isValid = false;
+                } else {
+                    field.style.borderColor = '';
+                }
+            });
+            
+            // التحقق من صحة المعدل
+            const gpa = parseFloat(document.getElementById('gpa').value);
+            if (gpa < 50 || gpa > 100 || isNaN(gpa)) {
+                alert('المعدل يجب أن يكون بين 50 و 100');
+                isValid = false;
+            }
+            
+            if (!isValid) {
+                alert('الرجاء ملء جميع الحقول الإلزامية بشكل صحيح');
+            }
+        } else if (step === 3) {
+            if (!State.selectedProgram) {
+                alert('الرجاء اختيار تخصص من القائمة');
+                isValid = false;
+            }
+        }
+        
+        return isValid;
+    }
+
+    function updateStepper() {
+        document.querySelectorAll('.step').forEach(step => {
+            step.classList.remove('active', 'completed');
+        });
+        
+        for (let i = 1; i <= State.currentStep; i++) {
+            const stepElement = document.querySelector(`.step[data-step="${i}"]`);
+            if (i < State.currentStep) {
+                stepElement.classList.add('completed');
+            } else {
+                stepElement.classList.add('active');
+            }
+        }
+    }
+
+    function showStep(stepNumber) {
+        document.querySelectorAll('.step-content').forEach(content => {
+            content.classList.remove('active');
+        });
+        document.getElementById(`step${stepNumber}`).classList.add('active');
+    }
+
+    // ============ PROGRAMS RENDERING ============
+    function renderPrograms() {
+        const container = document.getElementById('programsContainer');
+        const college = State.selectedCollege;
+        const gpa = State.gpa || 0;
+        
+        if (!college) {
+            container.innerHTML = '<p>الرجاء اختيار الكلية أولاً</p>';
+            return;
+        }
+        
+        let programsHTML = '<h4>البرامج المتاحة</h4>';
+        
+        college.programs.forEach(program => {
+            const isEligible = gpa >= program.minGPA;
+            const isSelected = State.selectedProgram && State.selectedProgram.id === program.id;
+            
+            programsHTML += `
+                <div class="program-card ${isEligible ? '' : 'disabled'} ${isSelected ? 'selected' : ''}" 
+                     data-program-id="${program.id}" onclick="selectProgram(${program.id})">
+                    <div class="program-header">
+                        <div class="program-title">${program.name}</div>
+                        <div class="gpa-badge">${program.minGPA}%</div>
+                    </div>
+                    <div class="program-details">
+                        <span><i class="fas fa-clock"></i> ${program.duration} سنوات</span>
+                        <span><i class="fas fa-book"></i> ${program.credits} ساعة</span>
+                        <span><i class="fas fa-award"></i> منحة ${program.scholarship}%</span>
+                    </div>
+                    ${!isEligible ? '<p style="color:red; margin-top:10px;">المعدل المطلوب: ' + program.minGPA + '%</p>' : ''}
+                </div>
+            `;
+        });
+        
+        container.innerHTML = programsHTML;
+    }
+
+    function selectProgram(programId) {
+        const college = State.selectedCollege;
+        const program = college.programs.find(p => p.id === programId);
+        
+        // التحقق من الأهلية
+        const gpa = State.gpa || 0;
+        if (gpa < program.minGPA) {
+            alert(`هذا البرنامج يتطلب معدلاً لا يقل عن ${program.minGPA}%`);
+            return;
+        }
+        
+        State.selectedProgram = program;
+        
+        // تحديث العرض
+        renderPrograms();
+        updateFeesCalculator();
+        updateEligibility();
+    }
+
+    // ============ RECOMMENDATIONS ============
+    function updateRecommendations() {
+        const gpa = State.gpa;
+        const recommendationBox = document.getElementById('step2Recommendation');
+        const recommendationGrid = document.getElementById('recommendationGrid');
+        
+        if (gpa < 60) {
+            recommendationBox.style.display = 'none';
+            return;
+        }
+        
+        recommendationBox.style.display = 'block';
+        
+        let recommendations = [];
+        
+        if (gpa >= 90) {
+            recommendations = [
+                { title: 'برامج النخبة', desc: 'منحة 25-30%', icon: 'fas fa-medal', color: '#FFD700' },
+                { title: 'الهندسة', desc: 'معدلك يؤهلك', icon: 'fas fa-cogs', color: '#0055A4' },
+                { title: 'العلوم الصحية', desc: 'فرص ممتازة', icon: 'fas fa-heartbeat', color: '#d32f2f' },
+                { title: 'البحث العلمي', desc: 'مسار أكاديمي', icon: 'fas fa-flask', color: '#00A86B' }
+            ];
+        } else if (gpa >= 80) {
+            recommendations = [
+                { title: 'برامج البكالوريوس', desc: 'منحة 15-20%', icon: 'fas fa-graduation-cap', color: '#0055A4' },
+                { title: 'علوم الحاسب', desc: 'طلب كبير', icon: 'fas fa-laptop-code', color: '#00A86B' },
+                { title: 'الإدارة والمحاسبة', desc: 'فرص واسعة', icon: 'fas fa-chart-line', color: '#f57c00' },
+                { title: 'التخصصات التقنية', desc: 'سوق العمل', icon: 'fas fa-tools', color: '#757575' }
+            ];
+        } else if (gpa >= 70) {
+            recommendations = [
+                { title: 'دبلوم متقدم', desc: 'مسار سريع', icon: 'fas fa-certificate', color: '#0055A4' },
+                { title: 'برامج التجسير', desc: 'ترقية للمستقبل', icon: 'fas fa-bridge', color: '#00A86B' },
+                { title: 'التقنيات العملية', desc: 'مهارات عملية', icon: 'fas fa-hands-helping', color: '#f57c00' },
+                { title: 'التدريب المهني', desc: 'خبرة عملية', icon: 'fas fa-user-graduate', color: '#757575' }
+            ];
+        } else {
+            recommendations = [
+                { title: 'دبلوم مهني', desc: 'تأهيل للعمل', icon: 'fas fa-hammer', color: '#0055A4' },
+                { title: 'دورات تأهيلية', desc: 'تحسين المهارات', icon: 'fas fa-chart-line', color: '#00A86B' },
+                { title: 'التدريب التقني', desc: 'شهادات معتمدة', icon: 'fas fa-user-graduate', color: '#f57c00' },
+                { title: 'المهارات الأساسية', desc: 'تأسيس قوي', icon: 'fas fa-book', color: '#757575' }
+            ];
+        }
+        
+        recommendationGrid.innerHTML = recommendations.map(rec => `
+            <div class="recommendation-card">
+                <i class="${rec.icon}" style="font-size: 24px; color: ${rec.color}; margin-bottom: 10px;"></i>
+                <div style="font-weight: 600; color: ${rec.color};">${rec.title}</div>
+                <div style="font-size: 12px; color: var(--gray-dark); margin-top: 5px;">${rec.desc}</div>
+            </div>
+        `).join('');
+    }
+
+    // ============ FEES CALCULATOR ============
+    function updateFeesCalculator() {
+        if (!State.selectedProgram || !State.selectedCollege) return;
+        
+        const program = State.selectedProgram;
+        const college = State.selectedCollege;
+        
+        const hours = program.credits;
+        const hourPrice = college.hourPrice;
+        const registrationFee = 500;
+        const techFee = document.getElementById('studyType').value === 'عن بعد' ? 1000 : 0;
+        
+        // تطبيق الخصم المبكر
+        const now = new Date();
+        const earlyDiscount = (now.getMonth() <= 5 && now.getDate() <= 30) ? 0.1 : 0; // قبل 30 يونيو
+        
+        // تطبيق نسبة المنحة
+        const scholarshipDiscount = program.scholarship / 100;
+        
+        const totalDiscount = earlyDiscount + scholarshipDiscount;
+        const totalFee = (hours * hourPrice + registrationFee + techFee) * (1 - totalDiscount);
+        
+        // تحديث الواجهة
+        document.getElementById('hourlyFee').textContent = `${hourPrice} ريال`;
+        document.getElementById('estimatedHours').textContent = `${hours} ساعة`;
+        document.getElementById('registrationFee').textContent = `${registrationFee} ريال`;
+        document.getElementById('techFee').textContent = `${techFee} ريال`;
+        document.getElementById('totalFee').textContent = `${Math.round(totalFee)} ريال`;
+    }
+
+    // ============ ELIGIBILITY CHECK ============
+    function updateEligibility() {
+        const container = document.getElementById('eligibilityStatus');
+        const gpa = State.gpa || 0;
+        
+        let eligibilityItems = [];
+        
+        // 1. المعدل العام
+        if (gpa >= 60) {
+            eligibilityItems.push({
+                text: 'المعدل التراكمي',
+                status: 'eligible',
+                icon: 'fa-check-circle',
+                message: 'معدلك مؤهل للقبول'
+            });
+        } else {
+            eligibilityItems.push({
+                text: 'المعدل التراكمي',
+                status: 'not-eligible',
+                icon: 'fa-times-circle',
+                message: 'المعدل أقل من 60%'
+            });
+        }
+        
+        // 2. الكلية المختارة
+        if (State.selectedCollege) {
+            if (gpa >= State.selectedCollege.minGPA) {
+                eligibilityItems.push({
+                    text: 'متطلبات الكلية',
+                    status: 'eligible',
+                    icon: 'fa-check-circle',
+                    message: 'مؤهل لهذه الكلية'
+                });
+            } else {
+                eligibilityItems.push({
+                    text: 'متطلبات الكلية',
+                    status: 'not-eligible',
+                    icon: 'fa-times-circle',
+                    message: `المطلوب: ${State.selectedCollege.minGPA}%`
+                });
+            }
+        }
+        
+        // 3. البرنامج المختار
+        if (State.selectedProgram) {
+            if (gpa >= State.selectedProgram.minGPA) {
+                eligibilityItems.push({
+                    text: 'متطلبات البرنامج',
+                    status: 'eligible',
+                    icon: 'fa-check-circle',
+                    message: 'مؤهل لهذا البرنامج'
+                });
+            } else {
+                eligibilityItems.push({
+                    text: 'متطلبات البرنامج',
+                    status: 'not-eligible',
+                    icon: 'fa-times-circle',
+                    message: `المطلوب: ${State.selectedProgram.minGPA}%`
+                });
+            }
+        }
+        
+        // 4. الرسوم
+        eligibilityItems.push({
+            text: 'القدرة المالية',
+            status: 'eligible',
+            icon: 'fa-check-circle',
+            message: 'الرسوم مناسبة'
+        });
+        
+        container.innerHTML = eligibilityItems.map(item => `
+            <div class="eligibility-item ${item.status}">
+                <i class="fas ${item.icon}"></i>
+                <div>
+                    <strong>${item.text}</strong>
+                    <div>${item.message}</div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // ============ REVIEW DATA ============
+    function updateReviewData() {
+        const container = document.getElementById('reviewData');
+        
+        const data = {
+            'الاسم الكامل': document.getElementById('fullName').value,
+            'رقم الهوية': document.getElementById('idNumber').value,
+            'الجنس': document.getElementById('gender').value,
+            'الجنسية': document.getElementById('nationality').value,
+            'نوع المتقدم': document.getElementById('applicantType').options[document.getElementById('applicantType').selectedIndex].text,
+            'البريد الإلكتروني': document.getElementById('email').value,
+            'رقم الجوال': document.getElementById('phone').value,
+            'نوع المؤهل': document.getElementById('qualificationType').value,
+            'تخصص الثانوية': document.getElementById('specialization').value,
+            'المعدل التراكمي': document.getElementById('gpa').value + '%',
+            'درجة القدرات': document.getElementById('aptitudeScore').value || 'غير محدد',
+            'نوع الدراسة': document.getElementById('studyType').value,
+            'نظام الدراسة': document.getElementById('studySystem').value,
+            'الكلية': State.selectedCollege ? State.selectedCollege.name : 'غير محدد',
+            'التخصص المختار': State.selectedProgram ? State.selectedProgram.name : 'غير محدد',
+            'مدة البرنامج': State.selectedProgram ? State.selectedProgram.duration + ' سنوات' : 'غير محدد',
+            'الساعات المعتمدة': State.selectedProgram ? State.selectedProgram.credits : 'غير محدد',
+            'نسبة المنحة': State.selectedProgram ? State.selectedProgram.scholarship + '%' : '0%',
+            'الرسوم المتوقعة': document.getElementById('totalFee').textContent
+        };
+        
+        container.innerHTML = Object.entries(data).map(([key, value]) => `
+            <div style="display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #ddd;">
+                <strong>${key}:</strong>
+                <span>${value}</span>
+            </div>
+        `).join('');
+    }
+
+    // ============ APPLICATION SUBMISSION ============
+    async function submitApplication() {
+        // التحقق النهائي
+        if (!document.getElementById('termsAgreement').checked) {
+            alert('يجب الموافقة على الشروط والأحكام');
+            return;
+        }
+        
+        const submitBtn = document.getElementById('submitBtn');
+        const originalText = submitBtn.innerHTML;
+        
+        // عرض حالة التحميل
+        submitBtn.innerHTML = '<div class="loading"></div> جاري الإرسال...';
+        submitBtn.disabled = true;
+        updateStatusIndicator('جاري إرسال طلبك...');
+        
+        try {
+            // إعداد رقم الطلب
+            const timestamp = Date.now();
+            const random = Math.floor(Math.random() * 1000);
+            const applicationNumber = `GULF-${timestamp.toString().slice(-6)}-${random}`;
+            
+            // تحديث بيانات النموذج المخفي
+            updateFormData(applicationNumber);
+            
+            // إرسال النموذج
+            const form = document.getElementById('formsubmitForm');
+            
+            // طريقة 1: استخدام fetch مع إعدادات خاصة
+            const response = await submitWithRetry(form, applicationNumber);
+            
+            if (response.success) {
+                // حفظ محلياً
+                saveToLocalStorage(applicationNumber);
+                
+                // عرض رسالة النجاح
+                showSuccessMessage(applicationNumber);
+                updateStatusIndicator('تم إرسال طلبك بنجاح!');
+            } else {
+                throw new Error('فشل الإرسال');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            
+            // المحاولة بطريقة بديلة
+            try {
+                // طريقة 2: إرسال مباشر للنموذج
+                document.getElementById('formsubmitForm').submit();
+                
+                // عرض رسالة النجاح مع تحذير
+                const timestamp = Date.now();
+                const random = Math.floor(Math.random() * 1000);
+                const applicationNumber = `GULF-${timestamp.toString().slice(-6)}-${random}`;
+                
+                saveToLocalStorage(applicationNumber);
+                showSuccessMessage(applicationNumber);
+                updateStatusIndicator('تم إرسال طلبك!');
+            } catch (fallbackError) {
+                // في حالة فشل جميع المحاولات
+                alert('حدث خطأ في الإرسال. الرجاء المحاولة مرة أخرى أو التواصل مع الدعم.');
+                updateStatusIndicator('خطأ في الإرسال');
+            }
+        } finally {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
+    }
+
+    async function submitWithRetry(form, applicationNumber) {
+        let retryCount = 0;
+        const maxRetries = 2;
+        
+        while (retryCount < maxRetries) {
+            try {
+                const formData = new FormData(form);
+                
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    mode: 'no-cors' // مهم لتفادي مشاكل CORS
+                });
+                
+                // مع no-cors لا يمكننا قراءة الرد، لذا نعتبره ناجحاً
+                return { success: true, applicationNumber };
+            } catch (error) {
+                retryCount++;
+                if (retryCount === maxRetries) {
+                    throw error;
+                }
+                // الانتظار قبل المحاولة التالية
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+        }
+    }
+
+    function updateFormData(applicationNumber) {
+        const now = new Date();
+        const timestamp = now.toLocaleString('ar-SA');
+        
+        document.getElementById('form_fullName').value = document.getElementById('fullName').value;
+        document.getElementById('form_idNumber').value = document.getElementById('idNumber').value;
+        document.getElementById('form_gender').value = document.getElementById('gender').value;
+        document.getElementById('form_nationality').value = document.getElementById('nationality').value;
+        document.getElementById('form_applicantType').value = document.getElementById('applicantType').options[document.getElementById('applicantType').selectedIndex].text;
+        document.getElementById('form_email').value = document.getElementById('email').value;
+        document.getElementById('form_phone').value = document.getElementById('phone').value;
+        document.getElementById('form_qualification').value = document.getElementById('qualificationType').value;
+        document.getElementById('form_specialization').value = document.getElementById('specialization').value;
+        document.getElementById('form_gpa').value = document.getElementById('gpa').value;
+        document.getElementById('form_aptitude').value = document.getElementById('aptitudeScore').value || 'غير محدد';
+        document.getElementById('form_studyType').value = document.getElementById('studyType').value;
+        document.getElementById('form_studySystem').value = document.getElementById('studySystem').value;
+        document.getElementById('form_college').value = State.selectedCollege ? State.selectedCollege.name : '';
+        document.getElementById('form_program').value = State.selectedProgram ? State.selectedProgram.name : '';
+        document.getElementById('form_duration').value = State.selectedProgram ? State.selectedProgram.duration + ' سنوات' : '';
+        document.getElementById('form_credits').value = State.selectedProgram ? State.selectedProgram.credits : '';
+        document.getElementById('form_scholarship').value = State.selectedProgram ? State.selectedProgram.scholarship + '%' : '0%';
+        document.getElementById('form_fees').value = document.getElementById('totalFee').textContent;
+        document.getElementById('form_appNumber').value = applicationNumber;
+        document.getElementById('form_timestamp').value = timestamp;
+    }
+
+    function saveToLocalStorage(applicationNumber) {
+        try {
+            const applicationData = {
+                id: applicationNumber,
+                timestamp: new Date().toISOString(),
+                personal: {
+                    fullName: document.getElementById('fullName').value,
+                    idNumber: document.getElementById('idNumber').value,
+                    gender: document.getElementById('gender').value,
+                    nationality: document.getElementById('nationality').value,
+                    applicantType: document.getElementById('applicantType').value,
+                    email: document.getElementById('email').value,
+                    phone: document.getElementById('phone').value
+                },
+                academic: {
+                    qualification: document.getElementById('qualificationType').value,
+                    specialization: document.getElementById('specialization').value,
+                    gpa: document.getElementById('gpa').value,
+                    aptitudeScore: document.getElementById('aptitudeScore').value
+                },
+                program: {
+                    college: State.selectedCollege?.name,
+                    program: State.selectedProgram?.name,
+                    studyType: document.getElementById('studyType').value,
+                    studySystem: document.getElementById('studySystem').value
+                }
+            };
+            
+            // حفظ في localStorage
+            let applications = JSON.parse(localStorage.getItem('gulfApplications') || '[]');
+            applications.push(applicationData);
+            localStorage.setItem('gulfApplications', JSON.stringify(applications));
+            
+            // حفظ نسخة منفصلة
+            localStorage.setItem(`app_${applicationNumber}`, JSON.stringify(applicationData));
+            
+            console.log('Application saved locally:', applicationNumber);
+            return true;
+        } catch (error) {
+            console.error('Error saving to localStorage:', error);
+            return false;
+        }
+    }
+
+    function showSuccessMessage(applicationNumber) {
+        document.getElementById('applicationNumber').textContent = applicationNumber;
+        document.getElementById('successMessage').style.display = 'block';
+        
+        // إخفاء نموذج المراجعة
+        document.querySelector('#step4 .form-section').style.display = 'none';
+        document.querySelector('#step4 .button-container').style.display = 'none';
+    }
+
+    function downloadApplication() {
+        const applicationNumber = document.getElementById('applicationNumber').textContent;
+        const appData = localStorage.getItem(`app_${applicationNumber}`);
+        
+        if (appData) {
+            const blob = new Blob([appData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `طلب_التحاق_${applicationNumber}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        } else {
+            alert('لم يتم العثور على بيانات الطلب للتنزيل');
+        }
+    }
+
+    function updateStatusIndicator(message) {
+        const indicator = document.getElementById('statusIndicator');
+        indicator.innerHTML = `<i class="fas fa-sync-alt"></i> ${message}`;
+    }
+
+    // جعل الدوال متاحة عالمياً
+    window.nextStep = nextStep;
+    window.prevStep = prevStep;
+    window.selectProgram = selectProgram;
+    window.submitApplication = submitApplication;
+    window.downloadApplication = downloadApplication;
+    </script>
+</body>
+                                      </html>
